@@ -23,11 +23,6 @@ namespace CountSummLib
         int partSize;
         BinaryReader reader;
 
-
-
-
-
-
         public async void CalculateParallel(string filename)
         {
             await Task.Run(() =>
@@ -82,8 +77,7 @@ namespace CountSummLib
                 else
                     return (int)fileLength;
             }
-            else
-                return (int)AvailablePhysicalMemory;
+            return (int)AvailablePhysicalMemory;
         }
 
 

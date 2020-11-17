@@ -67,6 +67,8 @@ namespace CountSummApp
                 var res = (int)(performed * 100 / maximum);
                 Result += byteRes;
                 label1.Text = Result.ToString();
+                if (res > 100)
+                    res = 100;
                 progressBar1.Value = res;
                 
             }));
