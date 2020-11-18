@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace CountSummLib
+namespace CountSummLib.Exceptions
 {
     [Serializable]
     internal class CalculateFileException : Exception

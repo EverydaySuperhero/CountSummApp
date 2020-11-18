@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CountSummApp", "CountSummAp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CountSummLib", "CountSummLib\CountSummLib.csproj", "{856949C3-D011-472B-9E66-410DB950DC32}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{A0940370-C104-4452-B64E-4961B003EFCE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{856949C3-D011-472B-9E66-410DB950DC32}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{856949C3-D011-472B-9E66-410DB950DC32}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{856949C3-D011-472B-9E66-410DB950DC32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0940370-C104-4452-B64E-4961B003EFCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0940370-C104-4452-B64E-4961B003EFCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0940370-C104-4452-B64E-4961B003EFCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0940370-C104-4452-B64E-4961B003EFCE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
