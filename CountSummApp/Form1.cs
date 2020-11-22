@@ -1,4 +1,7 @@
 ﻿using CountSummLib;
+using CountSummLib.BusinessLogic;
+using CountSummLib.Interfaces;
+using CountSummLib.Models;
 using Microsoft.VisualBasic.Devices;
 using System;
 using System.Collections.Concurrent;
@@ -18,7 +21,7 @@ namespace CountSummApp
     {
         public Form1() => InitializeComponent();
 
-
+        Main Main = new Main();
         private void button1_Click(object sender, EventArgs e)
         {
             using (var fbd = new FolderBrowserDialog())
@@ -27,41 +30,53 @@ namespace CountSummApp
 
                 if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
                 {
-                    string[] files = Directory.GetFiles(fbd.SelectedPath);
-                    if (files.Length == 0 && Directory.GetDirectories(fbd.SelectedPath).Length == 0)
-                    {
-                        MessageBox.Show("Selected folder doesn't contains any files of directories.","Error");
-                        return;
-                    }
-                    BlockingCollection<string> list = new BlockingCollection<string>(new ConcurrentQueue<string>(files.ToList()));
-                    Calculate(list);
+                    Main.FileCompleteNotifier += Main_FileCompleteNotifier;
+                    Main.FileProgressNotifier += Main_FileProgressNotifier; ;
+                    Main.CalculateFiles(fbd.SelectedPath);
                 }
             }
-
-
         }
 
-
-        private void Calculate(BlockingCollection<string> dirPath)
+        private void Main_FileProgressNotifier(string str, long performed, long maximum)
         {
-            FilesHandler fileReader = new FilesHandler();
-            fileReader.processEventNotifier += FileReader_processNotifyer;
-            var res = fileReader.CalculateParallel(dirPath).Result;
+            BeginInvoke((Action)(() =>
+            {
+                label1.Text = performed + " of " + maximum;
+
+                var result = (performed * 100 / maximum);
+                if (result > 100)
+                    result = 100;
+                progressBar1.Value = (int)result;
+
+            }));
+
+            
         }
 
-        private void FileReader_processNotifyer(string res, long performed, long maximum)
+        private void Main_FileCompleteNotifier(FileValue fileValue, bool successful, string err = null)
         {
             BeginInvoke((Action)(() =>
             {
                 //MessageBox.Show("значение: " + res + ".");
-                richTextBox1.AppendText(res + "\n");
-
-                var result = (int)(performed * 100 / maximum);
-                if (result > 100)
-                    result = 100;
-                progressBar1.Value = result;
+                if (!string.IsNullOrEmpty(fileValue.Params))
+                {
+                    richTextBox1.AppendText(fileValue.Params + "\n");
+                    //if(richTextBox1.Lines.Length!=0)
+                    //richTextBox1.SelectionStart = richTextBox1.Find(richTextBox1.Lines[richTextBox1.Lines.Length-1]);
+                    //richTextBox1.ScrollToCaret();
+                }
+               
             }));
         }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            //Main.processEventNotifier += FileReader_processNotifyer;
+            //Main.CalculateFiles("D://Mafia - Definitve Edition/");
+        }
+
+
     }
 }
 

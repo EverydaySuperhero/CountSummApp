@@ -45,12 +45,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abstract\FilesHandler.cs" />
     <Compile Include="Abstract\MemoryManager.cs" />
+    <Compile Include="BusinessLogic\FileWriter.cs" />
+    <Compile Include="Exceptions\ReportException.cs" />
+    <Compile Include="Exceptions\StopException.cs" />
     <Compile Include="Exceptions\CalculateFileException.cs" />
-    <Compile Include="FilesHandler.cs" />
-    <Compile Include="FilesHandlerBig.cs" />
-    <Compile Include="FolderManager.cs" />
+    <Compile Include="BusinessLogic\FilesHandler.cs" />
+    <Compile Include="BusinessLogic\FilesHandlerBig.cs" />
+    <Compile Include="BusinessLogic\FolderManager.cs" />
     <Compile Include="Interfaces\IFileReader.cs" />
+    <Compile Include="Interfaces\IFolderManager.cs" />
+    <Compile Include="Interfaces\IStopable.cs" />
+    <Compile Include="Main.cs" />
     <Compile Include="Models\FileValue.cs" />
     <Compile Include="Models\StructFolder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

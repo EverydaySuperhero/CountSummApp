@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace CountSummLib.Interfaces
 {
-    public interface IFilesReader
+    public delegate void FileProgressNotifier(string str, long performed, long maximum);
+    public delegate void FileCompleteNotifier(FileValue fileValue, bool successful,string err=null);
+
+    public interface IFilesReadeble
     {
-
-        public delegate void EventNotifier(string res, long performed, long maximum);
-        public event EventNotifier processEventNotifier;
-
-
-        Task<List<FileValue>> CalculateParallel(BlockingCollection<string> filenames);
+        public event FileProgressNotifier ProcessEventNotifier;
+        public event FileCompleteNotifier FileCompleteNotifier;
+        public Task<ConcurrentBag<FileValue>> CalculateParallel(ConcurrentBag<string> filenames);
 
     }
 }
