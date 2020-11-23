@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,21 +9,27 @@ using System.Xml.Serialization;
 
 namespace CountSummLib.Models
 {
-    [XmlRoot("item")]
     public struct FileValue
     {
+        [DisplayName("Name")]
         [XmlElement("file")]
-        public string FileName;
+        public string FileName { get; set; }
+
+        [DisplayName("Summ of byte values")]
         [XmlElement("value")]
-        public long Summ;
+        public long Summ { get; set; }
         [XmlIgnore]
-        public string Params;
+        [DisplayName("Info")]
+        public string Params { get; set; }
         [XmlIgnore]
-        public string Error;
+        [DisplayName("Error")]
+        public string Error { get; set; }
 
         [XmlIgnore]
-        public string FilePath;
+        [Browsable(false)]
+        public string FilePath { get; set; }
         [XmlIgnore]
+        [DisplayName("Folder")]
         public string FolderPath => Path.GetDirectoryName(FilePath);
     }
 }

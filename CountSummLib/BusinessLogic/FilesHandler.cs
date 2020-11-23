@@ -16,27 +16,30 @@ namespace CountSummLib.BusinessLogic
         protected int FilesCount = 0;
 
 
-        //public event FileProgressNotifier ProcessEventNotifier;
-        //public event FileCompleteNotifier FileCompleteNotifier;
+
 
         public override async Task<ConcurrentBag<FileValue>> CalculateParallel(ConcurrentBag<string> filenames)
         {
-            progress = 0;
-            FilesCount = filenames.Count;
-            return await Task.Run(() =>
+            try
             {
+                progress = 0;
+                FilesCount = filenames.Count;
+                return await Task.Run(() =>
+                {
+                    var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                    var loop = Parallel.ForEach(filenames, parallelOptions, (filename, stp) => { ReadAndCalculateFile(filename, stp); });
+                    if (NeedToStop)
+                        throw new StopException("Calculating stopped!");
 
-                var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                var loop = Parallel.ForEach(filenames, parallelOptions, (filename, stp) => { ReadAndCalculateFile(filename, stp); });
-                //foreach(var filename in filenames)
-                //{
-                //    ReadAndCalculateFile(filename, null);
-                //}
-                if (NeedToStop)
-                    throw new StopException();
-
-                return fileValues;
-            });
+                    return fileValues;
+                });
+            }
+            catch (Exception e)
+            {
+                if (e.InnerException is StopException)
+                    throw e.InnerException;
+                throw e;
+            }
         }
 
         private void ReadAndCalculateFile(string filename, ParallelLoopState stp, int blockSize = 0)
