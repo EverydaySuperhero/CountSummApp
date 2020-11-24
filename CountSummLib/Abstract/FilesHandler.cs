@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CountSummLib.Abstract
 {
-    public abstract class FilesHandler : MemoryManager, IFilesReadeble, IStopable
+    public abstract class FilesHandler : MemoryManager, IFilesReadeble, IProgressNotifable, IStopable
     {
         public FilesHandler() => fileValues = new ConcurrentBag<FileValue>();
         public ConcurrentBag<FileValue> fileValues;
@@ -18,7 +18,7 @@ namespace CountSummLib.Abstract
         protected int progress = 0;
         protected bool NeedToStop { get; set; } = false;
 
-        public abstract event FileProgressNotifier ProcessEventNotifier;
+        public abstract event ProgressNotifier ProcessNotifier;
         public abstract event FileCompleteNotifier FileCompleteNotifier;
 
         public virtual Task<ConcurrentBag<FileValue>> CalculateParallel(ConcurrentBag<string> filenames) 
@@ -39,5 +39,7 @@ namespace CountSummLib.Abstract
         }
 
         public async virtual  void StopCalculate() => await Task.Run(() => { NeedToStop = true; });
+
+
     }
 }

@@ -32,12 +32,13 @@ namespace CountSummLib.Abstract
 
 
                 if (MemoryBlockMax > fileLength)
-                    if (MemoryBlockMax > int.MaxValue)
-                        return int.MaxValue-2;
-                    else
-                        return (int)MemoryBlockMax;
-                else
                     return (int)fileLength;
+
+                else
+                     if (MemoryBlockMax > int.MaxValue)
+                    return int.MaxValue - 2;
+                else
+                    return (int)MemoryBlockMax;
 
             }
             catch (Exception)

@@ -1,5 +1,6 @@
 ﻿using CountSummLib;
 using CountSummLib.BusinessLogic;
+using CountSummLib.Exceptions;
 using CountSummLib.Interfaces;
 using CountSummLib.Models;
 using Microsoft.VisualBasic.Devices;
@@ -47,9 +48,23 @@ namespace CountSummApp
 
                 if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
                 {
-                    fileValues.Clear();
-                    progressBar1.Value = 0;
-                    Main.CalculateFiles(fbd.SelectedPath);
+                    try
+                    {
+                        fileValues.Clear();
+                        progressBar1.Value = 0;
+                        Main.CalculateFiles(fbd.SelectedPath, "Calculation Stopped");
+                    }
+                    catch (Exception ex)
+                    {
+
+                        if (ex.InnerException is ReportException)
+                            MessageBox.Show(ex.InnerException.InnerException.Message, "Error");
+                        else
+                            MessageBox.Show(ex.InnerException.Message, "Error");
+
+
+                    }
+                    
                 }
             }
         }

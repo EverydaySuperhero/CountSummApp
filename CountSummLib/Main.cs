@@ -13,32 +13,44 @@ namespace CountSummLib
     public class Main
     {
         FilesHandler fileReader;
+        Report Report;
 
-        public event FileProgressNotifier FileProgressNotifier;
+        public event ProgressNotifier FileProgressNotifier;
         public event FileCompleteNotifier FileCompleteNotifier;
+        public string DataFileName;
+        public bool isWork = false;
 
-
-
-
-        public Task CalculateFiles(string filePath)
+        public  Task CalculateFiles(string filePath,string CalculationStopped=null)
         {
-            return Task.Run(() =>
+            return  Task.Run(() =>
             {
                 try
                 {
-                    //string[] files = Directory.GetFiles(filePath);//macOS Catalina/
+                    if (isWork) return;
+                    isWork = true;
                     ConcurrentBag<string> DirPaths = FolderManager.GetAllFilesFromSubfolder(filePath);
                     var res = Calculate(DirPaths).Result;
-                    Report report = new Report();
-                    report.GroupAndWriteFiles(res);
+                    Report = new XmlDataWriter();
+                    Report.ProcessNotifier += Main_ProcessEventNotifier;
+                    Report.GroupAndWriteFiles(res,DataFileName??"").GetAwaiter().GetResult();
                 }
                 catch (Exception e)
                 {
                     if (e.InnerException is StopException)
-                        FileProgressNotifier?.Invoke("Calculation stopped", 0, 100);
+                        FileProgressNotifier?.Invoke(string.IsNullOrEmpty(CalculationStopped)?"Calculation stopped":CalculationStopped, 0, 100);
+                    if (e.InnerException is ReportException)
+                        throw e;
+                    throw e;
 
                 }
-                GC.Collect();
+                finally
+                {
+
+                    isWork = false;
+
+                    GC.Collect();
+
+                }
 
             });
 
@@ -52,21 +64,20 @@ namespace CountSummLib
                 try
                 {
                     fileReader = new FilesHandlerLittle();
-                    fileReader.ProcessEventNotifier += Main_ProcessEventNotifier;
+                    fileReader.ProcessNotifier += Main_ProcessEventNotifier;
                     fileReader.FileCompleteNotifier += Main_FileCompleteNotifier;
-                    return fileReader.CalculateParallel(dirPaths).Result;
+                    var a = fileReader.CalculateParallel(dirPaths);
+                    return a.Result;
                 }
                 catch(Exception e)
                 {
-                    if (e is StopException)
-                        throw e;
                     if (e.InnerException is StopException)
                         throw e.InnerException;
                     throw e;
                 }
                 finally
                 {
-                    fileReader.ProcessEventNotifier -= Main_ProcessEventNotifier;
+                    fileReader.ProcessNotifier -= Main_ProcessEventNotifier;
                     fileReader.FileCompleteNotifier -= Main_FileCompleteNotifier;
                     fileReader = null;
                     dirPaths = new ConcurrentBag<string>();

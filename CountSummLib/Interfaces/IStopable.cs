@@ -9,6 +9,5 @@ namespace CountSummLib.Interfaces
     public interface IStopable
     {
         public void StopCalculate();
-
     }
 }

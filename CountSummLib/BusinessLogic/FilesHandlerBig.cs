@@ -20,7 +20,7 @@ namespace CountSummLib.BusinessLogic
         static FileStream reader;
         string filename;
 
-        public override event FileProgressNotifier ProcessEventNotifier;
+        public override event ProgressNotifier ProcessNotifier;
         public override event FileCompleteNotifier FileCompleteNotifier;
 
         public async override Task<ConcurrentBag<FileValue>> CalculateParallel(ConcurrentBag<string> filenames)
@@ -32,11 +32,6 @@ namespace CountSummLib.BusinessLogic
                 {
                     try
                     {
-                        if (filename == null)
-                        {
-
-                        }
-
                         long res = CalculateParallelPerByte(filename).Result;
                         FileValue @struct = new FileValue() { FilePath = filename, Summ = res };
                         list.Add(@struct);
@@ -50,7 +45,7 @@ namespace CountSummLib.BusinessLogic
                 }
                 return list;
             });
-
+            
         }
 
         private void ClearValues()
@@ -79,7 +74,7 @@ namespace CountSummLib.BusinessLogic
                    Parallel.For(0, iterations, i=> { Calculate(i); });
                    string str = $"File: {Path.GetFileName(filename)}  value: {res} time: {(DateTime.Now - dt).TotalSeconds}, length: {fileLength}";
                    var fv = new FileValue() { Params = str, FilePath = filename, Summ = res };
-                   ProcessEventNotifier?.Invoke(str, 100, 100);
+                   ProcessNotifier?.Invoke(str, 100, 100);
                    reader?.Close();
                    reader?.Dispose();
                    reader = null;
@@ -105,12 +100,6 @@ namespace CountSummLib.BusinessLogic
            });
         }
 
-
-        private void CalculateFilePerByte(long i)
-        {
-            Calculate(i);
-
-        }
         private void Calculate(long i, int baseBlockSize = 0)
         {
             try

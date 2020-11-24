@@ -4,42 +4,44 @@ using CountSummLib.Interfaces;
 using CountSummLib.Models;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace CountSummLib.BusinessLogic
 {
     internal class FilesHandlerLittle : FilesHandler
     {
-        public override event FileProgressNotifier ProcessEventNotifier;
+        public override event ProgressNotifier ProcessNotifier;
         public override event FileCompleteNotifier FileCompleteNotifier;
         protected int FilesCount = 0;
-
-
-
-
+        //ConcurrentBag<int> threadIDs = new ConcurrentBag<int>();
         public override async Task<ConcurrentBag<FileValue>> CalculateParallel(ConcurrentBag<string> filenames)
         {
-            try
+            //try
+            //{
+            progress = 0;
+            FilesCount = filenames.Count;
+            return await Task.Run(() =>
             {
-                progress = 0;
-                FilesCount = filenames.Count;
-                return await Task.Run(() =>
-                {
-                    var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                    var loop = Parallel.ForEach(filenames, parallelOptions, (filename, stp) => { ReadAndCalculateFile(filename, stp); });
-                    if (NeedToStop)
-                        throw new StopException("Calculating stopped!");
+                var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                var loop = Parallel.ForEach(filenames, parallelOptions, (filename, stp) => { ReadAndCalculateFile(filename, stp); });
+                if (NeedToStop)
+                    throw new StopException("Calculating stopped!");
 
-                    return fileValues;
-                });
-            }
-            catch (Exception e)
-            {
-                if (e.InnerException is StopException)
-                    throw e.InnerException;
-                throw e;
-            }
+                return fileValues;
+            });
+            //}
+            //catch (Exception e)
+            //{
+            //    if (e is StopException)
+            //        throw e;
+            //    if (e.InnerException is StopException)
+            //        throw e.InnerException;
+            //    throw e;
+            //}
         }
 
         private void ReadAndCalculateFile(string filename, ParallelLoopState stp, int blockSize = 0)
@@ -51,14 +53,17 @@ namespace CountSummLib.BusinessLogic
                 var fileLength = GetLength(filename);
                 using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open)))
                 {
-
+                    //threadIDs.Add(Thread.CurrentThread.ManagedThreadId);
                     var partSize = (blockSize == 0) ? GetBlockSize(fileLength) : blockSize;
                     byte[] bytes;
                     for (int i = 0; i < fileLength; i += partSize)
                     {
                         if (NeedToStop)
+                        {
                             stp?.Stop();
-
+                            GC.Collect();
+                            return;
+                        }
 
                         bytes = new byte[partSize];
                         bytes = reader.ReadBytes(bytes.Length);
@@ -76,7 +81,8 @@ namespace CountSummLib.BusinessLogic
                         progress++;
                     }
                     FileCompleteNotifier?.Invoke(fv, true);
-                    ProcessEventNotifier?.Invoke(addInfo, progress, FilesCount);
+                    ProcessNotifier?.Invoke(addInfo, progress, FilesCount);
+                    //threadIDs.(Thread.CurrentThread.ManagedThreadId);
                 }
 
             }
@@ -100,23 +106,9 @@ namespace CountSummLib.BusinessLogic
                 }
                 progress++;
                 FileCompleteNotifier?.Invoke(fv, false, addInfo);
-                ProcessEventNotifier?.Invoke(addInfo, progress, FilesCount);
+                ProcessNotifier?.Invoke(addInfo, progress, FilesCount);
             }
         }
         public override async void StopCalculate() => await Task.Run(() => { NeedToStop = true; });
     }
 }
-//  private static BinaryReader CreateReader(string filename) => new BinaryReader(new FileStream(filename, FileMode.Open));
-
-//private int GetMaxPartSize()
-//{
-//    var AvailablePhysicalMemory = (long)(new ComputerInfo().AvailablePhysicalMemory * 0.5f);
-//    if (AvailablePhysicalMemory > 2147647)// если выделяемая память меньше макс размера пакета, вернуть макс количество памяти
-//    {
-//        if (fileLength > AvailablePhysicalMemory)//если размер файла меньше выделяемой памяти, пусть размер пакета = файлу, иначе вернуть макс занчение пакета 
-//            return (int)2147647;
-//        else
-//            return (int)fileLength;
-//    }
-//    return (int)AvailablePhysicalMemory;
-//}

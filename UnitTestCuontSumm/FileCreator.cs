@@ -1,11 +1,11 @@
 ﻿using System.IO;
 
-namespace Test
+namespace UnitTestCuontSumm
 {
     public class FileCreator
     {
         public int summ=0;
-        public void CreateFile(string filename,int count)
+        public long CreateFile(string filename,int count)
         {
             byte[] bytes = new byte[count];
             for(int i=0;i<count;i++)
@@ -13,11 +13,11 @@ namespace Test
                 bytes[i] = (byte)i;
             }
             File.WriteAllBytes(filename, bytes);
-            summ = CalculateAmount(bytes);
+            return CalculateAmount(bytes);
         }
-        private int CalculateAmount(byte[] bytes)
+        private long CalculateAmount(byte[] bytes)
         {
-            int summ = 0;
+            long summ = 0;
             foreach (var @byte in bytes)
             {
                 summ += @byte;

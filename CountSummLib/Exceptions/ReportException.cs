@@ -4,10 +4,12 @@ using System.Runtime.Serialization;
 namespace CountSummLib.Exceptions
 {
     [Serializable]
-    internal class ReportException : Exception
+    public class ReportException : Exception
     {
-        public ReportException()
+        public Exception e;
+        public ReportException(Exception e)
         {
+            this.e = e;
         }
 
         public ReportException(string message) : base(message)
